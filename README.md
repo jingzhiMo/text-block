@@ -1,2 +1,2 @@
 # text-block
-text block. a chrome extension 
+text-block. A Chrome Extension.
