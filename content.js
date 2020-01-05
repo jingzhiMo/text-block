@@ -1,4 +1,4 @@
-console.log('this is content v3')
+console.log('this is content v5')
 const IGNORE_TAG = {
   'script': true,
   'video': true,
@@ -14,22 +14,22 @@ const IGNORE_TAG = {
   'hr': true,
   'br': true
 }
-const REPLACE_PATTERN = [
-  { content: '商家', replace: 'shangjia' }
-]
+let REPLACE_PATTERN = []
 /**
  * @description  深度遍历获取所有text的标签
  * @param  {HTMLElement} root  以该节点开始深度查找
  * @returns {HTMLElement[]} element  所有匹配上的 element
 */
 function matchElement(root) {
-  // 忽略部分标签
-  if (IGNORE_TAG[root.nodeName.toLowerCase()]) return []
-
-  if ([1, 3].indexOf(root.nodeType) === -1) return []
-
   let element = []
+
+  // 忽略部分标签
+  if (IGNORE_TAG[root.nodeName.toLowerCase()]) return element
+  if ([1, 3].indexOf(root.nodeType) === -1) return element
+
   const { childNodes, children } = root
+
+  if (!childNodes || !childNodes.length) return element
 
   for (let i = 0; i < childNodes.length; i++) {
     // 文本节点
@@ -37,6 +37,8 @@ function matchElement(root) {
       element.push(childNodes[i])
     }
   }
+
+  if (!children || !children.length) return element
 
   for (let i = 0; i < children.length; i++) {
     element = element.concat(matchElement(children[i]))
@@ -65,23 +67,30 @@ function replaceElement(textElement) {
   }
 }
 
-// 首次启动为 DomContentLoaded 事件
-replaceElement(matchElement(document.body))
+chrome.storage.local.get(['tb_rule', 'tb_status'], result => {
+  console.log('rule, result', result)
+  if (!result.tb_rule || !result.tb_rule.length || result.tb_status !== 'running') return
 
-const observer = new MutationObserver(mutationRecordList => {
-  mutationRecordList.forEach(record => {
-    // 仅在新增节点进行处理
-    record.addedNodes.forEach(node => {
-      let textElement = matchElement(node)
+  console.log('begin block')
+  REPLACE_PATTERN = result.tb_rule
+  // 首次启动为 DomContentLoaded 事件
+  replaceElement(matchElement(document.body))
 
-      console.log('match textElement', textElement)
-      replaceElement(textElement)
+  const observer = new MutationObserver(mutationRecordList => {
+    mutationRecordList.forEach(record => {
+      // 仅在新增节点进行处理
+      record.addedNodes.forEach(node => {
+        let textElement = matchElement(node)
+
+        console.log('match textElement', textElement)
+        replaceElement(textElement)
+      })
     })
+    console.log('callback update observer')
   })
-  console.log('callback update observer')
-})
 
-observer.observe(document.body, {
-  subtree: true,
-  childList: true
+  observer.observe(document.body, {
+    subtree: true,
+    childList: true
+  })
 })

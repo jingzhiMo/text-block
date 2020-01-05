@@ -4,8 +4,7 @@
   "description": "init version",
   "manifest_version": 2,
   "background": {
-    "scripts": ["background.js"],
-    "persistent": false
+    "scripts": ["background.js"]
   },
   "content_scripts": [
     {
@@ -19,6 +18,9 @@
   "browser_action": {
     "default_popup": "popup.html"
   },
+  "permissions": [
+    "storage"
+  ],
   "icons": {
     "16": "icon.png",
     "32": "icon.png",
