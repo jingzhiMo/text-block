@@ -58,7 +58,26 @@ function replaceElement(textElement) {
     let newText = text
 
     REPLACE_PATTERN.forEach(pattern => {
-      newText = newText.replace(pattern.content, pattern.replace)
+      let content = pattern.content
+      content.trim()
+
+      if (pattern.type === 'regexp') {
+        const p = /^\/(.*)\/([gimsuy]*)$/
+
+        if (p.test(content)) {
+          const match = content.match(p)
+          content = new RegExp(match[1], match[2])
+        } else {
+          content = new RegExp(content)
+        }
+
+        if (content.test(newText)) {
+          newText = newText.replace(content, pattern.replace)
+        }
+      } else {
+        // 字符串匹配规则
+        newText = newText.replace(content, pattern.replace)
+      }
     })
 
     if (newText !== text) {
