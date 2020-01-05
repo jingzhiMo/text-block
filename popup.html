@@ -16,83 +16,16 @@
           </select>
           <div class="tb-rule__select-arrow"></div>
         </div>
-        <input class="tb-rule__input mini" type="text" placeholder="input rule">
+        <input name="content" class="tb-rule__input tb-rule__content" type="text" placeholder="input rule">
         <span class="tb-rule__split-word">To:</span>
-        <input class="tb-rule__input" type="text" placeholder="default is null.">
+        <input name="replace" class="tb-rule__input tb-rule__replace" type="text" placeholder="default is null.">
         <button class="tb-rule__close" title="delete this rule"></button>
       </div>
-      <!--
-      <div class="tb-rule">
-        <div class="tb-rule__select-box">
-          <select name="tb-rule" class="tb-rule__select">
-            <option value="regexp">RegExp Match</option>
-            <option value="text">Text Match</option>
-          </select>
-          <div class="tb-rule__select-arrow"></div>
-        </div>
-        <input class="tb-rule__input mini" type="text" placeholder="input rule">
-        <span class="tb-rule__split-word">To:</span>
-        <input class="tb-rule__input" type="text" placeholder="default is null.">
-        <button class="tb-rule__close" title="delete this rule"></button>
-      </div>
-      <div class="tb-rule">
-        <div class="tb-rule__select-box">
-          <select name="tb-rule" class="tb-rule__select">
-            <option value="regexp">RegExp Match</option>
-            <option value="text">Text Match</option>
-          </select>
-          <div class="tb-rule__select-arrow"></div>
-        </div>
-        <input class="tb-rule__input mini" type="text" placeholder="input rule">
-        <span class="tb-rule__split-word">To:</span>
-        <input class="tb-rule__input" type="text" placeholder="default is null.">
-        <button class="tb-rule__close" title="delete this rule"></button>
-      </div>
-      <div class="tb-rule">
-        <div class="tb-rule__select-box">
-          <select name="tb-rule" class="tb-rule__select">
-            <option value="regexp">RegExp Match</option>
-            <option value="text">Text Match</option>
-          </select>
-          <div class="tb-rule__select-arrow"></div>
-        </div>
-        <input class="tb-rule__input mini" type="text" placeholder="input rule">
-        <span class="tb-rule__split-word">To:</span>
-        <input class="tb-rule__input" type="text" placeholder="default is null.">
-        <button class="tb-rule__close" title="delete this rule"></button>
-      </div>
-      <div class="tb-rule">
-        <div class="tb-rule__select-box">
-          <select name="tb-rule" class="tb-rule__select">
-            <option value="regexp">RegExp Match</option>
-            <option value="text">Text Match</option>
-          </select>
-          <div class="tb-rule__select-arrow"></div>
-        </div>
-        <input class="tb-rule__input mini" type="text" placeholder="input rule">
-        <span class="tb-rule__split-word">To:</span>
-        <input class="tb-rule__input" type="text" placeholder="default is null.">
-        <button class="tb-rule__close" title="delete this rule"></button>
-      </div>
-      <div class="tb-rule">
-        <div class="tb-rule__select-box">
-          <select name="tb-rule" class="tb-rule__select">
-            <option value="regexp">RegExp Match</option>
-            <option value="text">Text Match</option>
-          </select>
-          <div class="tb-rule__select-arrow"></div>
-        </div>
-        <input class="tb-rule__input mini" type="text" placeholder="input rule">
-        <span class="tb-rule__split-word">To:</span>
-        <input class="tb-rule__input" type="text" placeholder="default is null.">
-        <button class="tb-rule__close" title="delete this rule"></button>
-      </div>
-      -->
     </div>
     <div class="tb-btn__wrap">
-      <button id="add-rule" class="tb-btn tb-btn__primary add-rule">Add Rule</button>
-      <button class="tb-btn tb-btn__primary">Start</button>
-      <button class="tb-btn tb-btn__default">Stop</button>
+      <button id="tb-add-rule" class="tb-btn tb-btn__primary add-rule">Add Rule</button>
+      <button id="tb-start-btn" class="tb-btn tb-btn__default tb-btn__primary">Start</button>
+      <button id="tb-stop-btn" class="tb-btn tb-btn__default tb-btn__danger">Stop</button>
     </div>
   </main>
   <script src="./popup.js"></script>
