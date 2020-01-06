@@ -1,4 +1,4 @@
-console.log('this is content v5')
+console.log('this is content v6')
 const IGNORE_TAG = {
   'script': true,
   'video': true,
@@ -86,6 +86,13 @@ function replaceElement(textElement) {
   }
 }
 
+/**
+ * @description  整个页面进行替换
+ */
+function replaceBody() {
+  replaceElement(matchElement(document.body))
+}
+
 chrome.storage.local.get(['tb_rule', 'tb_status'], result => {
   console.log('rule, result', result)
   if (!result.tb_rule || !result.tb_rule.length || result.tb_status !== 'running') return
@@ -93,7 +100,7 @@ chrome.storage.local.get(['tb_rule', 'tb_status'], result => {
   console.log('begin block')
   REPLACE_PATTERN = result.tb_rule
   // 首次启动为 DomContentLoaded 事件
-  replaceElement(matchElement(document.body))
+  replaceBody()
 
   const observer = new MutationObserver(mutationRecordList => {
     mutationRecordList.forEach(record => {
@@ -112,4 +119,15 @@ chrome.storage.local.get(['tb_rule', 'tb_status'], result => {
     subtree: true,
     childList: true
   })
+})
+
+// 监听来自popup的事件
+let lock = false
+chrome.runtime.onMessage.addListener(request => {
+  if (request.reload && !lock) {
+    lock = true
+    REPLACE_PATTERN = request.rule
+    replaceBody()
+    lock = false
+  }
 })

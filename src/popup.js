@@ -1,6 +1,5 @@
 // background.js 文件
-const background = chrome.extension.getBackgroundPage()
-
+// const background = chrome.extension.getBackgroundPage()
 function $ (selector, root) {
   root = root || document
   return root.querySelectorAll(selector)
@@ -23,6 +22,27 @@ function makeId(length) {
 }
 
 /**
+ * @description  获取当前的所有规则
+ * @returns {Array} 所有的规则
+*/
+function loadRule() {
+  const ruleList = $('.tb-rule:not(#tb-rule-template)')
+  const result = []
+
+  ruleList.forEach(ruleElement => {
+    let rule = {
+      type: $('.tb-rule__select', ruleElement)[0].value,
+      content: $('.tb-rule__content', ruleElement)[0].value,
+      replace: $('.tb-rule__replace', ruleElement)[0].value
+    }
+
+    result.push(rule)
+  })
+
+  return result
+}
+
+/**
  * @description  添加规则
  */
 function addRule(data) {
@@ -30,19 +50,21 @@ function addRule(data) {
   let wrap = $('.tb-rule-list')[0]
   let closeBtn = $('.tb-rule__close', template)[0]
 
-  // 删除规则
-  closeBtn.addEventListener('click', function() {
-    template.remove()
-  })
-  template.removeAttribute('id')
-  template.id = makeId(5)
-
   // 新增的规则需要填入数据
   if (data) {
     $('.tb-rule__select', template)[0].value = data.type
     $('.tb-rule__content', template)[0].value = data.content
     $('.tb-rule__replace', template)[0].value = data.replace
   }
+
+  // 删除规则
+  const templateId = makeId(5)
+  closeBtn.addEventListener('click', function() {
+    template.remove()
+    setStorage(RULE_KEY, loadRule())
+  })
+  template.removeAttribute('id')
+  template.id = templateId
   wrap.appendChild(template)
 }
 
@@ -61,19 +83,8 @@ const INACTIVE_STATUS = 'inactive'
  */
 function start(event) {
   const { target } = event
+  const result = loadRule()
 
-  const ruleList = $('.tb-rule:not(#tb-rule-template)')
-  const result = []
-
-  ruleList.forEach(ruleElement => {
-    let rule = {
-      type: $('.tb-rule__select', ruleElement)[0].value,
-      content: $('.tb-rule__content', ruleElement)[0].value,
-      replace: $('.tb-rule__replace', ruleElement)[0].value
-    }
-
-    result.push(rule)
-  })
   target.className = BASE_BTN_CLASS
   $('#tb-stop-btn')[0].className = BASE_BTN_CLASS + ' ' + STOP_BTN_CLASS
   setStorage(RULE_KEY, result)
@@ -92,20 +103,34 @@ function stop(event) {
 }
 
 /**
+ * @description  刷新当前替换规则，通知content
+*/
+async function reload() {
+  const rule = loadRule()
+  await setStorage(RULE_KEY, rule)
+  chrome.tabs.query({ active: true, currentWindow: true }, tabList => {
+    chrome.tabs.sendMessage(tabList[0].id, { reload: true, rule })
+  })
+}
+
+/**
  * @description  写入 storage
  */
 function setStorage(key, value) {
-  const item = {}
+  return new Promise(resolve => {
+    const item = {}
 
-  item[key] = value
-  chrome.storage.local.set(item, () => {
-    console.log('set storage success', key)
+    item[key] = value
+    chrome.storage.local.set(item, () => {
+      resolve()
+    })
   })
 }
 
 $('#tb-add-rule')[0].addEventListener('click', () => addRule())
 $('#tb-start-btn')[0].addEventListener('click', start)
 $('#tb-stop-btn')[0].addEventListener('click', stop)
+$('#tb-reload-btn')[0].addEventListener('click', reload)
 
 // 读取之前已写入的规则
 chrome.storage.local.get([RULE_KEY], result => {
