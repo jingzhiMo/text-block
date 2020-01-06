@@ -208,7 +208,7 @@ button {
   background-color: transparent;
   border-color: #ff7875;
 }
-.add-rule {
+.tb-add-rule {
   position: absolute;
   top: 16px;
   left: 16px;

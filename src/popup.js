@@ -22,6 +22,14 @@ function makeId(length) {
 }
 
 /**
+ * @description  根据class名称拼接最终的class
+ * @param {string} cx 类名参数
+ */
+function generateClass(...cx) {
+  return cx.join(' ')
+}
+
+/**
  * @description  获取当前的所有规则
  * @returns {Array} 所有的规则
 */
@@ -78,6 +86,12 @@ const STATUS_KEY = 'tb_status'
 const RUNNING_STATUS = 'running'
 const INACTIVE_STATUS = 'inactive'
 
+// click button
+const $startBtn = $('#tb-start-btn')[0]
+const $stopBtn = $('#tb-stop-btn')[0]
+const $reloadBtn = $('#tb-reload-btn')[0]
+const $addBtn = $('#tb-add-rule')[0]
+
 /**
  * @description 启动block
  */
@@ -86,7 +100,11 @@ function start(event) {
   const result = loadRule()
 
   target.className = BASE_BTN_CLASS
-  $('#tb-stop-btn')[0].className = BASE_BTN_CLASS + ' ' + STOP_BTN_CLASS
+  target.disabled = true
+  $stopBtn.className = generateClass(BASE_BTN_CLASS, STOP_BTN_CLASS)
+  $stopBtn.disabled = false
+  $reloadBtn.className = generateClass(BASE_BTN_CLASS, START_BTN_CLASS)
+  $reloadBtn.disabled = false
   setStorage(RULE_KEY, result)
   setStorage(STATUS_KEY, RUNNING_STATUS)
 }
@@ -98,7 +116,11 @@ function stop(event) {
   const { target } = event
 
   target.className = BASE_BTN_CLASS
-  $('#tb-start-btn')[0].className = BASE_BTN_CLASS + ' ' + START_BTN_CLASS
+  target.disabled = true
+  $startBtn.className = generateClass(BASE_BTN_CLASS, START_BTN_CLASS)
+  $startBtn.disabled = false
+  $reloadBtn.className = BASE_BTN_CLASS
+  $reload.disabled = false
   setStorage(STATUS_KEY, INACTIVE_STATUS)
 }
 
@@ -127,10 +149,10 @@ function setStorage(key, value) {
   })
 }
 
-$('#tb-add-rule')[0].addEventListener('click', () => addRule())
-$('#tb-start-btn')[0].addEventListener('click', start)
-$('#tb-stop-btn')[0].addEventListener('click', stop)
-$('#tb-reload-btn')[0].addEventListener('click', reload)
+$addBtn.addEventListener('click', () => addRule())
+$startBtn.addEventListener('click', start)
+$stopBtn.addEventListener('click', stop)
+$reloadBtn.addEventListener('click', reload)
 
 // 读取之前已写入的规则
 chrome.storage.local.get([RULE_KEY], result => {
@@ -145,10 +167,18 @@ chrome.storage.local.get([STATUS_KEY], result => {
   const status = result[STATUS_KEY]
   // 启动中
   if (status && status === RUNNING_STATUS) {
-    $('#tb-start-btn')[0].className = BASE_BTN_CLASS
-    $('#tb-stop-btn')[0].className = BASE_BTN_CLASS + ' ' + STOP_BTN_CLASS
+    $stopBtn.className = generateClass(BASE_BTN_CLASS, STOP_BTN_CLASS)
+    $stopBtn.disabled = false
+    $startBtn.className = BASE_BTN_CLASS
+    $startBtn.disabled = true
+    $reloadBtn.className = generateClass(BASE_BTN_CLASS, START_BTN_CLASS)
+    $reloadBtn.disabled = false
   } else {
-    $('#tb-start-btn')[0].className = BASE_BTN_CLASS + ' ' + START_BTN_CLASS
-    $('#tb-stop-btn')[0].className = BASE_BTN_CLASS
+    $startBtn.className = generateClass(BASE_BTN_CLASS, START_BTN_CLASS)
+    $stopBtn.disabled = false
+    $stopBtn.className = BASE_BTN_CLASS
+    $stopBtn.disabled = true
+    $reloadBtn.className = BASE_BTN_CLASS
+    $reloadBtn.disabled = true
   }
 })
