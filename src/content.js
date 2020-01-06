@@ -1,4 +1,4 @@
-console.log('this is content v6')
+console.log('this is content v7')
 const IGNORE_TAG = {
   'script': true,
   'video': true,
@@ -14,7 +14,9 @@ const IGNORE_TAG = {
   'hr': true,
   'br': true
 }
+// 代替的模式
 let REPLACE_PATTERN = []
+
 /**
  * @description  深度遍历获取所有text的标签
  * @param  {HTMLElement} root  以该节点开始深度查找
@@ -59,20 +61,24 @@ function replaceElement(textElement) {
 
     REPLACE_PATTERN.forEach(pattern => {
       let content = pattern.content
-      content.trim()
 
       if (pattern.type === 'regexp') {
         const p = /^\/(.*)\/([gimsuy]*)$/
 
-        if (p.test(content)) {
-          const match = content.match(p)
-          content = new RegExp(match[1], match[2])
-        } else {
-          content = new RegExp(content)
-        }
+        try {
+          if (p.test(content)) {
+            const match = content.match(p)
+            content = new RegExp(match[1], match[2])
+          } else {
+            content = new RegExp(content)
+          }
 
-        if (content.test(newText)) {
-          newText = newText.replace(content, pattern.replace)
+          if (content.test(newText)) {
+            newText = newText.replace(content, pattern.replace)
+          }
+        } catch (e) {
+          // 正则出错，退级为字符串替换
+          newText = newText.replace(pattern.content, pattern.replace)
         }
       } else {
         // 字符串匹配规则
@@ -88,6 +94,7 @@ function replaceElement(textElement) {
 
 /**
  * @description  整个页面进行替换
+ * @returns {void}
  */
 function replaceBody() {
   replaceElement(matchElement(document.body))
@@ -108,7 +115,6 @@ chrome.storage.local.get(['tb_rule', 'tb_status'], result => {
       record.addedNodes.forEach(node => {
         let textElement = matchElement(node)
 
-        console.log('match textElement', textElement)
         replaceElement(textElement)
       })
     })

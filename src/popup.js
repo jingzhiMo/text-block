@@ -40,14 +40,14 @@ function loadRule() {
   ruleList.forEach(ruleElement => {
     let rule = {
       type: $('.tb-rule__select', ruleElement)[0].value,
-      content: $('.tb-rule__content', ruleElement)[0].value,
+      content: $('.tb-rule__content', ruleElement)[0].value.trim(),
       replace: $('.tb-rule__replace', ruleElement)[0].value
     }
 
     result.push(rule)
   })
 
-  return result
+  return result.filter(rule => !!rule.content)
 }
 
 /**
@@ -120,7 +120,7 @@ function stop(event) {
   $startBtn.className = generateClass(BASE_BTN_CLASS, START_BTN_CLASS)
   $startBtn.disabled = false
   $reloadBtn.className = BASE_BTN_CLASS
-  $reload.disabled = false
+  $reloadBtn.disabled = false
   setStorage(STATUS_KEY, INACTIVE_STATUS)
 }
 
@@ -143,6 +143,7 @@ function setStorage(key, value) {
     const item = {}
 
     item[key] = value
+    chrome.storage.sync.set(item)
     chrome.storage.local.set(item, () => {
       resolve()
     })
