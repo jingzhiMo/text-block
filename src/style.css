@@ -173,7 +173,7 @@ button {
   background-color: #fff;
   border-color: #d9d9d9;
 }
-#tb-start-btn {
+#tb-start-btn, #tb-stop-btn {
   margin-right: 12px;
 }
 .tb-btn__default {
@@ -183,29 +183,29 @@ button {
   cursor: not-allowed;
 }
 .tb-btn__primary {
-  color: #fff;
-  background-color: #1890ff;
+  background-color: #fff;
+  color: #1890ff;
   border-color: #1890ff;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.12);
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
   cursor: pointer;
 }
 .tb-btn__danger {
-  color: #fff;
-  background-color: #ff4d4f;
+  background-color: #fff;
+  color: #ff4d4f;
   border-color: #ff4d4f;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.12);
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
   cursor: pointer;
 }
 .tb-btn__primary:hover {
-  color: #fff;
-  background-color: #40a9ff;
+  color: #40a9ff;
+  background-color: transparent;
   border-color: #40a9ff;
 }
 .tb-btn__danger:hover {
-  color: #fff;
-  background-color: #ff7875;
+  color: #ff7875;
+  background-color: transparent;
   border-color: #ff7875;
 }
 .add-rule {
