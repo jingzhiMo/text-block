@@ -1,7 +1,7 @@
 {
   "name": "textBlock",
-  "version": "0.0.1",
-  "description": "init version",
+  "version": "0.7.0",
+  "description": "A Chrome Extension to block some text in website.Ususally you can set match rule to block text that you not want to show. And you can replace some match text to another. Sometimes parent can block sensitive text for children.",
   "manifest_version": 2,
   "background": {
     "scripts": ["background.js"]
