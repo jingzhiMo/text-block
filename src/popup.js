@@ -1,5 +1,3 @@
-// background.js 文件
-// const background = chrome.extension.getBackgroundPage()
 function $ (selector, root) {
   root = root || document
   return root.querySelectorAll(selector)
@@ -95,9 +93,8 @@ const $addBtn = $('#tb-add-rule')[0]
 /**
  * @description 启动block
  */
-function start(event) {
+async function start(event) {
   const { target } = event
-  const result = loadRule()
 
   target.className = BASE_BTN_CLASS
   target.disabled = true
@@ -105,8 +102,8 @@ function start(event) {
   $stopBtn.disabled = false
   $reloadBtn.className = generateClass(BASE_BTN_CLASS, START_BTN_CLASS)
   $reloadBtn.disabled = false
-  setStorage(RULE_KEY, result)
-  setStorage(STATUS_KEY, RUNNING_STATUS)
+  await setStorage(STATUS_KEY, RUNNING_STATUS)
+  reload()
 }
 
 /**
