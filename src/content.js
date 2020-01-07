@@ -1,4 +1,3 @@
-console.log('this is content v7')
 const IGNORE_TAG = {
   'script': true,
   'video': true,
@@ -101,10 +100,8 @@ function replaceBody() {
 }
 
 chrome.storage.local.get(['tb_rule', 'tb_status'], result => {
-  console.log('rule, result', result)
   if (!result.tb_rule || !result.tb_rule.length || result.tb_status !== 'running') return
 
-  console.log('begin block')
   REPLACE_PATTERN = result.tb_rule
   // 首次启动为 DomContentLoaded 事件
   replaceBody()
@@ -118,7 +115,6 @@ chrome.storage.local.get(['tb_rule', 'tb_status'], result => {
         replaceElement(textElement)
       })
     })
-    console.log('callback update observer')
   })
 
   observer.observe(document.body, {

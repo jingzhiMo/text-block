@@ -157,7 +157,6 @@ $reloadBtn.addEventListener('click', reload)
 
 // 读取之前已写入的规则
 chrome.storage.local.get([RULE_KEY], result => {
-  console.log('rule, result', result)
   if (result[RULE_KEY]) {
     result[RULE_KEY].forEach(rule => (addRule(rule)))
   }
