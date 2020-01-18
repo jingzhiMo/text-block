@@ -1,3 +1,5 @@
+// import { Node } from './list'
+// 忽略的标签
 const IGNORE_TAG = {
   'script': true,
   'video': true,
@@ -15,6 +17,97 @@ const IGNORE_TAG = {
 }
 // 代替的模式
 let REPLACE_PATTERN = []
+// 匹配上的元素的队列
+const MATCH_QUEUE = []
+// 需要进行处理的元素的队列
+const REPLACE_QUEUE = []
+
+// 匹配元素进行文字处理
+let matchHandle = 0
+// 对元素进行替换处理
+let replaceHandle = 0
+
+/**
+ * @description  使用requestIdleCallback处理替换动作
+ */
+function matchHandler(deadline) {
+  while(MATCH_QUEUE.length && (deadline.timeRemaining() > 0 || deadline.didTimeout)) {
+    const element = MATCH_QUEUE.shift()
+    const text = element.textContent
+    let newText = text
+
+    REPLACE_PATTERN.forEach(pattern => {
+      let content = pattern.content
+
+      if (pattern.type === 'regexp') {
+        const p = /^\/(.*)\/([gimsuy]*)$/
+
+        try {
+          if (p.test(content)) {
+            const match = content.match(p)
+            content = new RegExp(match[1], match[2])
+          } else {
+            content = new RegExp(content)
+          }
+
+          if (content.test(newText)) {
+            newText = newText.replace(content, pattern.replace)
+          }
+        } catch (e) {
+          // 正则出错，退级为字符串替换
+          newText = newText.replace(pattern.content, pattern.replace)
+        }
+      } else {
+        // 字符串匹配规则
+        newText = newText.replace(content, pattern.replace)
+      }
+    })
+
+    // 需要进行数据替换
+    if (newText !== text) {
+      // 添加到替换队列
+      REPLACE_QUEUE.push({
+        element,
+        text: newText
+      })
+
+      if (!replaceHandle) {
+        replaceHandle = requestAnimationFrame(replaceHandler)
+      }
+    }
+  }
+
+  if (!MATCH_QUEUE.length) {
+    matchHandle = 0
+  }
+}
+
+/**
+ * @description  替换元素中的文本
+ */
+function replaceHandler() {
+  if (!REPLACE_QUEUE.length) {
+    replaceHandle = 0
+    return
+  }
+
+  const { element, text } = REPLACE_QUEUE.shift()
+
+  element.textContent = text
+  requestAnimationFrame(replaceHandler)
+}
+
+/**
+ * @description  把匹配的元素加入到队列中
+ * @param {Array}  elementList  匹配到的元素
+ */
+function enqueueMatch(elementList) {
+  MATCH_QUEUE.push(...elementList)
+
+  if (!matchHandle) {
+    matchHandle = requestIdleCallback(matchHandler)
+  }
+}
 
 /**
  * @description  深度遍历获取所有text的标签
@@ -96,9 +189,10 @@ function replaceElement(textElement) {
  * @returns {void}
  */
 function replaceBody() {
-  replaceElement(matchElement(document.body))
+  enqueueMatch(matchElement(document.body))
 }
 
+// 页面启动，根据规则进行替换
 chrome.storage.local.get(['tb_rule', 'tb_status'], result => {
   if (!result.tb_rule || !result.tb_rule.length || result.tb_status !== 'running') return
 
@@ -109,11 +203,7 @@ chrome.storage.local.get(['tb_rule', 'tb_status'], result => {
   const observer = new MutationObserver(mutationRecordList => {
     mutationRecordList.forEach(record => {
       // 仅在新增节点进行处理
-      record.addedNodes.forEach(node => {
-        let textElement = matchElement(node)
-
-        replaceElement(textElement)
-      })
+      record.addedNodes.forEach(node => (enqueueMatch(matchElement(node))))
     })
   })
 
