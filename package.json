@@ -4,7 +4,8 @@
   "description": "",
   "main": "background.js",
   "scripts": {
-    "build": "rm -rf dist && cp -r src dist && npx babel src --out-dir dist"
+    "build": "rm -rf dist && cp -r src dist && npx babel src --out-dir dist",
+    "lint": "eslint ./src/*.js"
   },
   "repository": {
     "type": "git",
@@ -17,7 +18,8 @@
     "@babel/cli": "^7.7.7",
     "@babel/core": "^7.7.7",
     "@babel/preset-env": "^7.7.7",
-    "cz-conventional-changelog": "3.0.2"
+    "cz-conventional-changelog": "3.0.2",
+    "eslint": "^6.8.0"
   },
   "browserslist": [
     "chrome > 49"
