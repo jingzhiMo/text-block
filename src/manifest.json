@@ -1,7 +1,7 @@
 {
   "name": "textBlock",
-  "version": "0.7.0",
-  "description": "A Chrome Extension to block some text in web.you can set match rule to block text or replace text that you not want to show.",
+  "version": "0.8.0",
+  "description": "A Chrome Extension to block some text in website.",
   "manifest_version": 2,
   "content_scripts": [
     {
