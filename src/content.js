@@ -1,4 +1,3 @@
-// import { Node } from './list'
 // 忽略的标签
 const IGNORE_TAG = {
   'script': true,
@@ -79,6 +78,8 @@ function matchHandler(deadline) {
 
   if (!MATCH_QUEUE.length) {
     matchHandle = 0
+  } else {
+    matchHandle = requestIdleCallback(matchHandler)
   }
 }
 
@@ -139,49 +140,6 @@ function matchElement(root) {
   }
 
   return element
-}
-
-/**
- * @description  把包含text的html标签进行替换
- * @param  {HTMLElement[]} textElement 需要进行替换的元素组
- * @returns {void}
-*/
-function replaceElement(textElement) {
-  for (let i = 0; i < textElement.length; i++) {
-    let text = textElement[i].textContent
-    let newText = text
-
-    REPLACE_PATTERN.forEach(pattern => {
-      let content = pattern.content
-
-      if (pattern.type === 'regexp') {
-        const p = /^\/(.*)\/([gimsuy]*)$/
-
-        try {
-          if (p.test(content)) {
-            const match = content.match(p)
-            content = new RegExp(match[1], match[2])
-          } else {
-            content = new RegExp(content)
-          }
-
-          if (content.test(newText)) {
-            newText = newText.replace(content, pattern.replace)
-          }
-        } catch (e) {
-          // 正则出错，退级为字符串替换
-          newText = newText.replace(pattern.content, pattern.replace)
-        }
-      } else {
-        // 字符串匹配规则
-        newText = newText.replace(content, pattern.replace)
-      }
-    })
-
-    if (newText !== text) {
-      textElement[i].textContent = newText
-    }
-  }
 }
 
 /**
