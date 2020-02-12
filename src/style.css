@@ -149,6 +149,7 @@ button {
   z-index: 3;
   box-shadow: 0 -2px 4px rgba(0,0,0,.12);
   overflow: hidden;
+  border-bottom: 1px solid #ebeef5;
 }
 .tb-btn {
   line-height: 22px;
@@ -175,6 +176,11 @@ button {
 }
 #tb-start-btn, #tb-stop-btn {
   margin-right: 12px;
+}
+.tb-btn.small {
+  padding: 0 10px;
+  height: 28px;
+  font-size: 12px;
 }
 .tb-btn__default {
   color: rgba(0, 0, 0, 0.25);
@@ -208,6 +214,15 @@ button {
   background-color: transparent;
   border-color: #ff7875;
 }
+.tb-btn__info {
+  color: #67c23a;
+  border-color: #67c23a;
+}
+.tb-btn__info:hover {
+  color: #95d874;
+  border-color: #95d874;
+  background-color: transparent;
+}
 .tb-add-rule {
   position: absolute;
   top: 16px;
@@ -222,5 +237,45 @@ button {
   text-align: center;
   font-size: 16px;
   line-height: 24px;
+  color: #606266;
+}
+
+.tb-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  color: #606266;
+  background-color: #fff;
+}
+.tb-status__label.small {
+  padding: 2px 6px;
+  font-size: 12px;
+  line-height: 20px;
+  height: 24px;
+  border: 1px solid #67c23a;
+  border-radius: 4px;
+  color: #67c23a;
+  cursor: pointer;
+}
+.tb-status__label.blacklist {
+  border-color: #909399;
+  color: #909399;
+}
+.tb-domain {
+  display: flex;
+  align-items: center;
+}
+.tb-domain__value {
+  display: inline-block;
+  width: 140px;
+  height: 28px;
+  box-sizing: border-box;
+  padding: 4px 8px;
+  margin-right: 8px;
+  font-size: 14px;
+  border: 1px solid #d0d3d9;
+  border-radius: 4px;
+  outline: none;
   color: #606266;
 }

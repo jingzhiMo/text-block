@@ -28,6 +28,17 @@
       <button id="tb-stop-btn" class="tb-btn tb-btn__default tb-btn__danger">Stop</button>
       <button id="tb-reload-btn" class="tb-btn tb-btn__default tb-btn__primary">Reload</button>
     </div>
+    <div class="tb-footer">
+      <div class="tb-status">
+        <span>domain status: </span>
+        <!-- <span class="tb-status__label" title="toggle status">white list</span> -->
+        <button class="tb-btn tb-btn__info small tb-status__label" title="toggle status">white list</button>
+      </div>
+      <div class="tb-domain">
+        <input class="tb-domain__value" type="text" id="domain" value="baidu.com" readonly />
+        <button class="tb-btn tb-btn__info small">Add To List</button>
+      </div>
+    </div>
   </main>
   <script src="./popup.js"></script>
 </body>
