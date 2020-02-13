@@ -84,11 +84,15 @@ const STATUS_KEY = 'tb_status'
 const RUNNING_STATUS = 'running'
 const INACTIVE_STATUS = 'inactive'
 
+let domainStatus = 'blacklist'
+
 // click button
 const $startBtn = $('#tb-start-btn')[0]
 const $stopBtn = $('#tb-stop-btn')[0]
 const $reloadBtn = $('#tb-reload-btn')[0]
 const $addBtn = $('#tb-add-rule')[0]
+const $toggleStatusBtn = $('#tb-status-btn')[0]
+const $addToListBtn = $('#tb-add-to-list')[0]
 
 /**
  * @description 启动block
@@ -133,6 +137,33 @@ async function reload() {
 }
 
 /**
+ * @description 切换域名黑白名单状态
+ */
+function toggleDomainStatus(ev) {
+  const element = ev.target
+
+  if (domainStatus === 'blacklist') {
+    element.className = element.className.replace(domainStatus, '')
+    $addToListBtn.className = $addToListBtn.className.replace(domainStatus, '')
+    domainStatus = 'whitelist'
+    element.innerHTML = 'white list'
+  } else {
+    let clazz = ' blacklist'
+    element.className += clazz
+    $addToListBtn.className += clazz
+    domainStatus = 'blacklist'
+    element.innerHTML = 'black list'
+  }
+}
+
+/**
+ * @description 把当前域名添加到对应的名单中
+ */
+function addToList() {
+  console.log($('#tb-current-domain')[0].value)
+}
+
+/**
  * @description  写入 storage
  */
 function setStorage(key, value) {
@@ -151,7 +182,10 @@ $addBtn.addEventListener('click', () => addRule())
 $startBtn.addEventListener('click', start)
 $stopBtn.addEventListener('click', stop)
 $reloadBtn.addEventListener('click', reload)
+$toggleStatusBtn.addEventListener('click', toggleDomainStatus)
+$addToListBtn.addEventListener('click', addToList)
 
+/*
 // 读取之前已写入的规则
 chrome.storage.local.get([RULE_KEY], result => {
   if (result[RULE_KEY]) {
@@ -179,3 +213,4 @@ chrome.storage.local.get([STATUS_KEY], result => {
     $reloadBtn.disabled = true
   }
 })
+*/

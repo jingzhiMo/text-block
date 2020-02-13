@@ -32,11 +32,11 @@
       <div class="tb-status">
         <span>domain status: </span>
         <!-- <span class="tb-status__label" title="toggle status">white list</span> -->
-        <button class="tb-btn tb-btn__info small tb-status__label" title="toggle status">white list</button>
+        <button id="tb-status-btn" class="tb-btn tb-btn__info small tb-status__label blacklist" title="toggle status">black list</button>
       </div>
       <div class="tb-domain">
-        <input class="tb-domain__value" type="text" id="domain" value="baidu.com" readonly />
-        <button class="tb-btn tb-btn__info small">Add To List</button>
+        <input class="tb-domain__value" type="text" id="tb-current-domain" value="baidu.com" readonly />
+        <button id="tb-add-to-list" class="tb-btn tb-btn__info small tb-status-add__btn blacklist">Add To List</button>
       </div>
     </div>
   </main>
