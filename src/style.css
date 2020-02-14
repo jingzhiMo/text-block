@@ -279,10 +279,10 @@ button {
   outline: none;
   color: #606266;
 }
-.tb-status-add__btn {
+.tb-domain__btn {
   width: 82px;
 }
-.tb-status-add__btn.blacklist {
+.tb-domain__btn.blacklist {
   border-color: #909399;
   color: #909399;
 }

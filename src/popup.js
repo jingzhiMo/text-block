@@ -81,6 +81,10 @@ const STOP_BTN_CLASS = 'tb-btn__danger'
 const RULE_KEY = 'tb_rule'
 const STATUS_KEY = 'tb_status'
 
+// 域名黑白名单在 chrome storage 的 key 值名称
+const DOMAIN_BLACK_LIST = 'tb_black_list'
+const DOMAIN_WHITE_LIST = 'tb_white_list'
+
 const RUNNING_STATUS = 'running'
 const INACTIVE_STATUS = 'inactive'
 
@@ -91,8 +95,9 @@ const $startBtn = $('#tb-start-btn')[0]
 const $stopBtn = $('#tb-stop-btn')[0]
 const $reloadBtn = $('#tb-reload-btn')[0]
 const $addBtn = $('#tb-add-rule')[0]
-const $toggleStatusBtn = $('#tb-status-btn')[0]
-const $addToListBtn = $('#tb-add-to-list')[0]
+const $toggleDomainStatusBtn = $('#tb-domain-status-btn')[0]
+const $domainBtn = $('#tb-domain-btn')[0]
+const $domain = $('#tb-current-domain')[0]
 
 /**
  * @description 启动block
@@ -144,23 +149,23 @@ function toggleDomainStatus(ev) {
 
   if (domainStatus === 'blacklist') {
     element.className = element.className.replace(domainStatus, '')
-    $addToListBtn.className = $addToListBtn.className.replace(domainStatus, '')
+    $domainBtn.className = $domainBtn.className.replace(domainStatus, '')
     domainStatus = 'whitelist'
     element.innerHTML = 'white list'
   } else {
     let clazz = ' blacklist'
     element.className += clazz
-    $addToListBtn.className += clazz
+    $domainBtn.className += clazz
     domainStatus = 'blacklist'
     element.innerHTML = 'black list'
   }
 }
 
 /**
- * @description 把当前域名添加到对应的名单中
+ * @description 把当前域名添加/移除到对应的名单中
  */
-function addToList() {
-  console.log($('#tb-current-domain')[0].value)
+function domainHandler() {
+  console.log('current domain', $domain.value)
 }
 
 /**
@@ -182,8 +187,8 @@ $addBtn.addEventListener('click', () => addRule())
 $startBtn.addEventListener('click', start)
 $stopBtn.addEventListener('click', stop)
 $reloadBtn.addEventListener('click', reload)
-$toggleStatusBtn.addEventListener('click', toggleDomainStatus)
-$addToListBtn.addEventListener('click', addToList)
+$toggleDomainStatusBtn.addEventListener('click', toggleDomainStatus)
+$domainBtn.addEventListener('click', domainHandler)
 
 /*
 // 读取之前已写入的规则
