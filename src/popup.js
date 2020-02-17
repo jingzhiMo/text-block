@@ -88,7 +88,9 @@ const DOMAIN_WHITE_LIST = 'tb_white_list'
 const RUNNING_STATUS = 'running'
 const INACTIVE_STATUS = 'inactive'
 
-let domainStatus = 'blacklist'
+const BLACK_LIST = 'blacklist'
+const WHITE_LIST = 'whitelist'
+let domainStatus = BLACK_LIST
 
 // click button
 const $startBtn = $('#tb-start-btn')[0]
@@ -147,25 +149,66 @@ async function reload() {
 function toggleDomainStatus(ev) {
   const element = ev.target
 
-  if (domainStatus === 'blacklist') {
+  if (domainStatus === BLACK_LIST) {
     element.className = element.className.replace(domainStatus, '')
     $domainBtn.className = $domainBtn.className.replace(domainStatus, '')
-    domainStatus = 'whitelist'
-    element.innerHTML = 'white list'
+    domainStatus = WHITE_LIST
+    element.innerHTML = WHITE_LIST
   } else {
-    let clazz = ' blacklist'
+    let clazz = ` ${BLACK_LIST}`
     element.className += clazz
     $domainBtn.className += clazz
-    domainStatus = 'blacklist'
-    element.innerHTML = 'black list'
+    domainStatus = BLACK_LIST
+    element.innerHTML = BLACK_LIST
   }
+
+  setDomainListBtn()
 }
 
 /**
  * @description 把当前域名添加/移除到对应的名单中
  */
-function domainHandler() {
-  console.log('current domain', $domain.value)
+var map = new Map()
+function domainHandler(ev) {
+  const currentDomain = $domain.value
+  const value = map.get(currentDomain)
+  const element = ev.target
+  const isBlacklist = domainStatus === BLACK_LIST ? 1 : 0
+
+  // 删除该域名
+  if (value && value.has(isBlacklist)) {
+    value.delete(isBlacklist)
+    map.set(currentDomain, value)
+    setDomainListBtn(false)
+  } else {
+    // 增加该域名
+    map.set(currentDomain, (value || new Set()).add(isBlacklist))
+    setDomainListBtn(true)
+  }
+}
+
+/**
+ * @description 设置域名处理按钮的状态
+ * @param inList {Boolean} 当前域名是否在列表中
+ */
+function setDomainListBtn(...arg) {
+  function updateHTML(inList) {
+    if (inList) {
+      $domainBtn.innerHTML = 'Remove'
+    } else {
+      $domainBtn.innerHTML = 'Add To List'
+    }
+  }
+
+  if (arg.length) {
+    updateHTML(...arg)
+    return
+  }
+  const currentDomain = $domain.value
+  const domainValue = map.get(currentDomain)
+  const isBlacklist = domainStatus === BLACK_LIST ? 1 : 0
+
+  updateHTML(domainValue ? domainValue.has(isBlacklist) : false)
 }
 
 /**
@@ -179,6 +222,17 @@ function setStorage(key, value) {
     chrome.storage.sync.set(item)
     chrome.storage.local.set(item, () => {
       resolve()
+    })
+  })
+}
+
+/**
+ * @description 获取 storage 的值
+ */
+function getStorage(key) {
+  return new Promise(resolve => {
+    chrome.storage.local.get([key], result => {
+      resolve(result[key])
     })
   })
 }
