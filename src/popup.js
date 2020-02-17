@@ -82,8 +82,7 @@ const RULE_KEY = 'tb_rule'
 const STATUS_KEY = 'tb_status'
 
 // 域名黑白名单在 chrome storage 的 key 值名称
-const DOMAIN_BLACK_LIST = 'tb_black_list'
-const DOMAIN_WHITE_LIST = 'tb_white_list'
+const DOMAIN_STATUS = 'tb_domain_status'
 
 const RUNNING_STATUS = 'running'
 const INACTIVE_STATUS = 'inactive'
@@ -244,7 +243,24 @@ $reloadBtn.addEventListener('click', reload)
 $toggleDomainStatusBtn.addEventListener('click', toggleDomainStatus)
 $domainBtn.addEventListener('click', domainHandler)
 
-/*
+chrome.tabs.query({
+  active: true,
+  currentWindow: true
+}, result => {
+  if (!result.length) return
+
+  const httpPattern = /^http/
+  const domainPattern = /^https?\:[\/]{2}([^\/]*)/
+  const rootDomainPattern = /([^\.]+.\w+$)/
+  const { url } = result[0]
+
+  if (!httpPattern.test(url)) return
+
+  const rootDomain = url.match(domainPattern)[1].match(rootDomainPattern)[1]
+  $domain.value = rootDomain
+  console.log('result', rootDomain)
+})
+
 // 读取之前已写入的规则
 chrome.storage.local.get([RULE_KEY], result => {
   if (result[RULE_KEY]) {
@@ -272,4 +288,3 @@ chrome.storage.local.get([STATUS_KEY], result => {
     $reloadBtn.disabled = true
   }
 })
-*/
