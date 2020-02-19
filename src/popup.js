@@ -82,7 +82,7 @@ const RULE_KEY = 'tb_rule'
 const STATUS_KEY = 'tb_status'
 
 // 域名黑白名单在 chrome storage 的 key 值名称
-const DOMAIN_STATUS = 'tb_domain_status'
+const DOMAIN_STATUS_KEY = 'tb_domain_status'
 
 const RUNNING_STATUS = 'running'
 const INACTIVE_STATUS = 'inactive'
@@ -90,6 +90,7 @@ const INACTIVE_STATUS = 'inactive'
 const BLACK_LIST = 'blacklist'
 const WHITE_LIST = 'whitelist'
 let domainStatus = BLACK_LIST
+let domainStatusMap = null
 
 // click button
 const $startBtn = $('#tb-start-btn')[0]
@@ -167,23 +168,24 @@ function toggleDomainStatus(ev) {
 /**
  * @description 把当前域名添加/移除到对应的名单中
  */
-var map = new Map()
-function domainHandler(ev) {
+async function domainHandler(ev) {
   const currentDomain = $domain.value
-  const value = map.get(currentDomain)
+  const value = domainStatusMap.get(currentDomain)
   const element = ev.target
   const isBlacklist = domainStatus === BLACK_LIST ? 1 : 0
 
   // 删除该域名
   if (value && value.has(isBlacklist)) {
     value.delete(isBlacklist)
-    map.set(currentDomain, value)
+    domainStatusMap.set(currentDomain, value)
     setDomainListBtn(false)
   } else {
     // 增加该域名
-    map.set(currentDomain, (value || new Set()).add(isBlacklist))
+    domainStatusMap.set(currentDomain, (value || new Set()).add(isBlacklist))
     setDomainListBtn(true)
   }
+
+  await setStorage(DOMAIN_STATUS_KEY, domainStatusMap)
 }
 
 /**
@@ -204,7 +206,7 @@ function setDomainListBtn(...arg) {
     return
   }
   const currentDomain = $domain.value
-  const domainValue = map.get(currentDomain)
+  const domainValue = domainStatusMap.get(currentDomain)
   const isBlacklist = domainStatus === BLACK_LIST ? 1 : 0
 
   updateHTML(domainValue ? domainValue.has(isBlacklist) : false)
@@ -261,30 +263,39 @@ chrome.tabs.query({
   console.log('result', rootDomain)
 })
 
-// 读取之前已写入的规则
-chrome.storage.local.get([RULE_KEY], result => {
-  if (result[RULE_KEY]) {
-    result[RULE_KEY].forEach(rule => (addRule(rule)))
-  }
-})
+// 读取之前已写入的规则、按钮状态、黑白名单
+chrome.storage.local.get(
+  [
+    RULE_KEY,
+    STATUS_KEY,
+    DOMAIN_STATUS_KEY
+  ],
+  result => {
+    // 自定义的规则
+    if (result[RULE_KEY]) {
+      result[RULE_KEY].forEach(rule => (addRule(rule)))
+    }
 
-// 设置按钮的状态
-chrome.storage.local.get([STATUS_KEY], result => {
-  const status = result[STATUS_KEY]
-  // 启动中
-  if (status && status === RUNNING_STATUS) {
-    $stopBtn.className = generateClass(BASE_BTN_CLASS, STOP_BTN_CLASS)
-    $stopBtn.disabled = false
-    $startBtn.className = BASE_BTN_CLASS
-    $startBtn.disabled = true
-    $reloadBtn.className = generateClass(BASE_BTN_CLASS, START_BTN_CLASS)
-    $reloadBtn.disabled = false
-  } else {
-    $startBtn.className = generateClass(BASE_BTN_CLASS, START_BTN_CLASS)
-    $stopBtn.disabled = false
-    $stopBtn.className = BASE_BTN_CLASS
-    $stopBtn.disabled = true
-    $reloadBtn.className = BASE_BTN_CLASS
-    $reloadBtn.disabled = true
+    // 按钮状态
+    const status = result[STATUS_KEY]
+    // 启动中
+    if (status && status === RUNNING_STATUS) {
+      $stopBtn.className = generateClass(BASE_BTN_CLASS, STOP_BTN_CLASS)
+      $stopBtn.disabled = false
+      $startBtn.className = BASE_BTN_CLASS
+      $startBtn.disabled = true
+      $reloadBtn.className = generateClass(BASE_BTN_CLASS, START_BTN_CLASS)
+      $reloadBtn.disabled = false
+    } else {
+      $startBtn.className = generateClass(BASE_BTN_CLASS, START_BTN_CLASS)
+      $stopBtn.disabled = false
+      $stopBtn.className = BASE_BTN_CLASS
+      $stopBtn.disabled = true
+      $reloadBtn.className = BASE_BTN_CLASS
+      $reloadBtn.disabled = true
+    }
+
+    // 黑白名单
+    domainStatusMap = result[DOMAIN_STATUS_KEY] || new Map()
   }
-})
+)
