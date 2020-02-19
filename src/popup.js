@@ -249,12 +249,3 @@ getStorage([
   domainStatusMap = result[DOMAIN_STATUS_KEY] || {}
   toggleDomainStatus({ target: $toggleDomainStatusBtn })
 })
-// chrome.storage.local.get(
-//   [
-//     RULE_KEY,
-//     STATUS_KEY,
-//     DOMAIN_STATUS_KEY
-//   ],
-//   result => {
-//   }
-// )
