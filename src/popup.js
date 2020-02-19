@@ -170,18 +170,18 @@ function toggleDomainStatus(ev) {
  */
 async function domainHandler(ev) {
   const currentDomain = $domain.value
-  const value = domainStatusMap.get(currentDomain)
+  const value = new Set(domainStatusMap[currentDomain])
   const element = ev.target
   const isBlacklist = domainStatus === BLACK_LIST ? 1 : 0
 
   // 删除该域名
-  if (value && value.has(isBlacklist)) {
+  if (value.has(isBlacklist)) {
     value.delete(isBlacklist)
-    domainStatusMap.set(currentDomain, value)
+    domainStatusMap[currentDomain] = Array.from(value)
     setDomainListBtn(false)
   } else {
     // 增加该域名
-    domainStatusMap.set(currentDomain, (value || new Set()).add(isBlacklist))
+    domainStatusMap[currentDomain] = Array.from(value.add(isBlacklist))
     setDomainListBtn(true)
   }
 
@@ -206,7 +206,7 @@ function setDomainListBtn(...arg) {
     return
   }
   const currentDomain = $domain.value
-  const domainValue = domainStatusMap.get(currentDomain)
+  const domainValue = new Set(domainStatusMap[currentDomain])
   const isBlacklist = domainStatus === BLACK_LIST ? 1 : 0
 
   updateHTML(domainValue ? domainValue.has(isBlacklist) : false)
@@ -260,7 +260,6 @@ chrome.tabs.query({
 
   const rootDomain = url.match(domainPattern)[1].match(rootDomainPattern)[1]
   $domain.value = rootDomain
-  console.log('result', rootDomain)
 })
 
 // 读取之前已写入的规则、按钮状态、黑白名单
@@ -296,6 +295,7 @@ chrome.storage.local.get(
     }
 
     // 黑白名单
-    domainStatusMap = result[DOMAIN_STATUS_KEY] || new Map()
+    domainStatusMap = result[DOMAIN_STATUS_KEY] || {}
+    toggleDomainStatus({ target: $toggleDomainStatusBtn })
   }
 )
