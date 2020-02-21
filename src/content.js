@@ -1,3 +1,10 @@
+import {
+  RULE_KEY,
+  STATUS_KEY,
+  RUNNING_STATUS
+} from './constant.js'
+import { getStorage } from './storage.js'
+
 // 忽略的标签
 const IGNORE_TAG = {
   'script': true,
@@ -151,10 +158,10 @@ function replaceBody() {
 }
 
 // 页面启动，根据规则进行替换
-chrome.storage.local.get(['tb_rule', 'tb_status'], result => {
-  if (!result.tb_rule || !result.tb_rule.length || result.tb_status !== 'running') return
+getStorage([RULE_KEY, STATUS_KEY]).then(result => {
+  if (!result[RULE_KEY] || !result[RULE_KEY].length || result[STATUS_KEY] !== RUNNING_STATUS) return
 
-  REPLACE_PATTERN = result.tb_rule
+  REPLACE_PATTERN = result[RULE_KEY]
   // 首次启动为 DomContentLoaded 事件
   replaceBody()
 
