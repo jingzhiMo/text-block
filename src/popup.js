@@ -100,7 +100,7 @@ async function start(event) {
 /**
  * @description 停止block
 */
-function stop(event) {
+async function stop(event) {
   const { target } = event
 
   target.className = BASE_BTN_CLASS
@@ -109,7 +109,8 @@ function stop(event) {
   $startBtn.disabled = false
   $reloadBtn.className = BASE_BTN_CLASS
   $reloadBtn.disabled = false
-  setStorage(STATUS_KEY, INACTIVE_STATUS)
+  await setStorage(STATUS_KEY, INACTIVE_STATUS)
+  sendMessage({ stop: true })
 }
 
 /**
@@ -118,8 +119,16 @@ function stop(event) {
 async function reload() {
   const rule = loadRule()
   await setStorage(RULE_KEY, rule)
+  sendMessage({ reload: true, rule })
+}
+
+/**
+ * @description 发送通知到 content.js
+ * @param {any} message
+ */
+function sendMessage(message) {
   chrome.tabs.query({ active: true, currentWindow: true }, tabList => {
-    chrome.tabs.sendMessage(tabList[0].id, { reload: true, rule })
+    chrome.tabs.sendMessage(tabList[0].id, message)
   })
 }
 

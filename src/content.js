@@ -33,6 +33,8 @@ let matchHandle = 0
 // 对元素进行替换处理
 let replaceHandle = 0
 
+let observer = null
+
 /**
  * @description  使用requestIdleCallback处理替换动作
  */
@@ -157,15 +159,11 @@ function replaceBody() {
   enqueueMatch(matchElement(document.body))
 }
 
-// 页面启动，根据规则进行替换
-getStorage([RULE_KEY, STATUS_KEY]).then(result => {
-  if (!result[RULE_KEY] || !result[RULE_KEY].length || result[STATUS_KEY] !== RUNNING_STATUS) return
-
-  REPLACE_PATTERN = result[RULE_KEY]
-  // 首次启动为 DomContentLoaded 事件
-  replaceBody()
-
-  const observer = new MutationObserver(mutationRecordList => {
+/**
+ * @description 启动监听document发生变化
+ */
+function startObserve() {
+  observer = new MutationObserver(mutationRecordList => {
     mutationRecordList.forEach(record => {
       // 仅在新增节点进行处理
       record.addedNodes.forEach(node => (enqueueMatch(matchElement(node))))
@@ -176,6 +174,16 @@ getStorage([RULE_KEY, STATUS_KEY]).then(result => {
     subtree: true,
     childList: true
   })
+}
+
+// 页面启动，根据规则进行替换
+getStorage([RULE_KEY, STATUS_KEY]).then(result => {
+  if (!result[RULE_KEY] || !result[RULE_KEY].length || result[STATUS_KEY] !== RUNNING_STATUS) return
+
+  REPLACE_PATTERN = result[RULE_KEY]
+  // 首次启动为 DomContentLoaded 事件
+  replaceBody()
+  startObserve()
 })
 
 // 监听来自popup的事件
@@ -185,6 +193,11 @@ chrome.runtime.onMessage.addListener(request => {
     lock = true
     REPLACE_PATTERN = request.rule
     replaceBody()
+    startObserve()
     lock = false
+  }
+
+  if (request.stop) {
+    observer.disconnect()
   }
 })
