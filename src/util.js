@@ -42,6 +42,18 @@ export function isValidDomain(domain) {
  * @param {string} domain
  */
 export function loadRootDomain(domain) {
-  const rootDomainPattern = /([^\.]+.\w+$)/
+  const rootDomainPattern = /([^.]+.\w+$)/
   return domain.match(rootDomainPattern)[1]
+}
+
+/**
+ * @description 获取当前tab的内容
+ */
+export function loadCurrentTab() {
+  return new Promise(resolve => {
+    chrome.tabs.query({
+      active: true,
+      currentWindow: true
+    }, resolve)
+  })
 }

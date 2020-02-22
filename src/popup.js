@@ -3,7 +3,8 @@ import {
   makeId,
   generateClass,
   isValidDomain,
-  loadRootDomain
+  loadRootDomain,
+  loadCurrentTab
 } from './util.js'
 import {
   RULE_KEY,
@@ -139,7 +140,7 @@ function sendMessage(message) {
 /**
  * @description 切换域名黑白名单模式
  */
-async function toggleDomainMode(ev) {
+async function toggleDomainMode() {
   if (domainMode === BLACK_LIST) {
     domainMode = WHITE_LIST
   } else {
@@ -154,10 +155,9 @@ async function toggleDomainMode(ev) {
 /**
  * @description 把当前域名添加/移除到对应的名单中
  */
-async function domainHandler(ev) {
+async function domainHandler() {
   const currentDomain = $domain.value
   const value = new Set(domainListMap[currentDomain])
-  const element = ev.target
   const mode = domainMode === BLACK_LIST ? BLACK_LIST_MODE : WHITE_LIST_MODE
 
   // 删除该域名
@@ -215,52 +215,11 @@ $domainModeBtn.addEventListener('click', toggleDomainMode)
 $domainBtn.addEventListener('click', domainHandler)
 
 async function init() {
-  // 读取之前已写入的规则、按钮状态、黑白名单
-  await getStorage([
-    RULE_KEY,
-    STATUS_KEY,
-    DOMAIN_LIST_KEY,
-    DOMAIN_MODE_KEY
-  ]).then(result => {
-    // 自定义的规则
-    if (result[RULE_KEY]) {
-      result[RULE_KEY].forEach(rule => (addRule(rule)))
-    }
+  const tabMessage = await loadCurrentTab()
 
-    // 按钮状态
-    const status = result[STATUS_KEY]
-    // 启动中
-    if (status && status === RUNNING_STATUS) {
-      $stopBtn.className = generateClass(BASE_BTN_CLASS, STOP_BTN_CLASS)
-      $stopBtn.disabled = false
-      $startBtn.className = BASE_BTN_CLASS
-      $startBtn.disabled = true
-      $reloadBtn.className = generateClass(BASE_BTN_CLASS, START_BTN_CLASS)
-      $reloadBtn.disabled = false
-    } else {
-      $startBtn.className = generateClass(BASE_BTN_CLASS, START_BTN_CLASS)
-      $stopBtn.disabled = false
-      $stopBtn.className = BASE_BTN_CLASS
-      $stopBtn.disabled = true
-      $reloadBtn.className = BASE_BTN_CLASS
-      $reloadBtn.disabled = true
-    }
-
-    // 黑白名单
-    domainListMap = result[DOMAIN_LIST_KEY] || {}
-    domainMode = result[DOMAIN_MODE_KEY] || BLACK_LIST
-    setDomainModeBtn()
-    setDomainListBtn()
-  })
-
-  chrome.tabs.query({
-    active: true,
-    currentWindow: true
-  }, result => {
-    if (!result.length) return
-
-    const domainPattern = /^https?\:[\/]{2}([^\/]*)/
-    const { url } = result[0]
+  if (tabMessage.length) {
+    const domainPattern = /^https?:[/]{2}([^/]*)/
+    const { url } = tabMessage[0]
 
     if (!isValidDomain(url)) {
       [
@@ -275,7 +234,44 @@ async function init() {
     }
 
     $domain.value = loadRootDomain(url.match(domainPattern)[1])
-  })
+  }
+
+  // 读取之前已写入的规则、按钮状态、黑白名单
+  const result = await getStorage([
+    RULE_KEY,
+    STATUS_KEY,
+    DOMAIN_LIST_KEY,
+    DOMAIN_MODE_KEY
+  ])
+  // 自定义的规则
+  if (result[RULE_KEY]) {
+    result[RULE_KEY].forEach(rule => (addRule(rule)))
+  }
+
+  // 按钮状态
+  const status = result[STATUS_KEY]
+  // 启动中
+  if (status && status === RUNNING_STATUS) {
+    $stopBtn.className = generateClass(BASE_BTN_CLASS, STOP_BTN_CLASS)
+    $stopBtn.disabled = false
+    $startBtn.className = BASE_BTN_CLASS
+    $startBtn.disabled = true
+    $reloadBtn.className = generateClass(BASE_BTN_CLASS, START_BTN_CLASS)
+    $reloadBtn.disabled = false
+  } else {
+    $startBtn.className = generateClass(BASE_BTN_CLASS, START_BTN_CLASS)
+    $stopBtn.disabled = false
+    $stopBtn.className = BASE_BTN_CLASS
+    $stopBtn.disabled = true
+    $reloadBtn.className = BASE_BTN_CLASS
+    $reloadBtn.disabled = true
+  }
+
+  // 黑白名单
+  domainListMap = result[DOMAIN_LIST_KEY] || {}
+  domainMode = result[DOMAIN_MODE_KEY] || BLACK_LIST
+  setDomainModeBtn()
+  setDomainListBtn()
 }
 
 init()
