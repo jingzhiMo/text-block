@@ -11,7 +11,11 @@
     "type": "git",
     "url": "git@github.com:jingzhiMo/text-block.git"
   },
-  "keywords": [],
+  "keywords": [
+    "chrome",
+    "extensions",
+    "block"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {
