@@ -6,7 +6,8 @@ import {
 import {
   RULE_KEY,
   STATUS_KEY,
-  DOMAIN_STATUS_KEY,
+  DOMAIN_MODE_KEY,
+  DOMAIN_LIST_KEY,
   RUNNING_STATUS,
   INACTIVE_STATUS,
   BLACK_LIST,
@@ -21,15 +22,15 @@ const BASE_BTN_CLASS = 'tb-btn tb-btn__default'
 const START_BTN_CLASS = 'tb-btn__primary'
 const STOP_BTN_CLASS = 'tb-btn__danger'
 
-let domainStatus = BLACK_LIST
-let domainStatusMap = null
+let domainMode = null
+let domainListMap = null
 
 // click button
 const $startBtn = $('#tb-start-btn')[0]
 const $stopBtn = $('#tb-stop-btn')[0]
 const $reloadBtn = $('#tb-reload-btn')[0]
 const $addBtn = $('#tb-add-rule')[0]
-const $toggleDomainStatusBtn = $('#tb-domain-status-btn')[0]
+const $domainModeBtn = $('#tb-domain-mode-btn')[0]
 const $domainBtn = $('#tb-domain-btn')[0]
 const $domain = $('#tb-current-domain')[0]
 
@@ -123,25 +124,18 @@ async function reload() {
 }
 
 /**
- * @description 切换域名黑白名单状态
+ * @description 切换域名黑白名单模式
  */
-function toggleDomainStatus(ev) {
-  const element = ev.target
-
-  if (domainStatus === BLACK_LIST) {
-    element.className = element.className.replace(domainStatus, '')
-    $domainBtn.className = $domainBtn.className.replace(domainStatus, '')
-    domainStatus = WHITE_LIST
-    element.innerHTML = WHITE_LIST
+async function toggleDomainMode(ev) {
+  if (domainMode === BLACK_LIST) {
+    domainMode = WHITE_LIST
   } else {
-    let clazz = ` ${BLACK_LIST}`
-    element.className += clazz
-    $domainBtn.className += clazz
-    domainStatus = BLACK_LIST
-    element.innerHTML = BLACK_LIST
+    domainMode = BLACK_LIST
   }
 
+  setDomainModeBtn()
   setDomainListBtn()
+  await setStorage(DOMAIN_MODE_KEY, domainMode)
 }
 
 /**
@@ -149,22 +143,22 @@ function toggleDomainStatus(ev) {
  */
 async function domainHandler(ev) {
   const currentDomain = $domain.value
-  const value = new Set(domainStatusMap[currentDomain])
+  const value = new Set(domainListMap[currentDomain])
   const element = ev.target
-  const isBlacklist = domainStatus === BLACK_LIST ? 1 : 0
+  const isBlacklist = domainMode === BLACK_LIST ? 1 : 0
 
   // 删除该域名
   if (value.has(isBlacklist)) {
     value.delete(isBlacklist)
-    domainStatusMap[currentDomain] = Array.from(value)
+    domainListMap[currentDomain] = Array.from(value)
     setDomainListBtn(false)
   } else {
     // 增加该域名
-    domainStatusMap[currentDomain] = Array.from(value.add(isBlacklist))
+    domainListMap[currentDomain] = Array.from(value.add(isBlacklist))
     setDomainListBtn(true)
   }
 
-  await setStorage(DOMAIN_STATUS_KEY, domainStatusMap)
+  await setStorage(DOMAIN_LIST_KEY, domainListMap)
 }
 
 /**
@@ -180,22 +174,31 @@ function setDomainListBtn(...arg) {
     }
   }
 
+  $domainBtn.className = `tb-btn tb-btn__info small tb-domain__btn ${domainMode}`
   if (arg.length) {
     updateHTML(...arg)
     return
   }
   const currentDomain = $domain.value
-  const domainValue = new Set(domainStatusMap[currentDomain])
-  const isBlacklist = domainStatus === BLACK_LIST ? 1 : 0
+  const domainValue = new Set(domainListMap[currentDomain])
+  const isBlacklist = domainMode === BLACK_LIST ? 1 : 0
 
   updateHTML(domainValue ? domainValue.has(isBlacklist) : false)
+}
+
+/**
+ * @description 设置切换域名模式的按钮
+ */
+function setDomainModeBtn() {
+  $domainModeBtn.className = `tb-btn tb-btn__info small tb-status__label ${domainMode}`
+  $domainModeBtn.innerHTML = domainMode
 }
 
 $addBtn.addEventListener('click', () => addRule())
 $startBtn.addEventListener('click', start)
 $stopBtn.addEventListener('click', stop)
 $reloadBtn.addEventListener('click', reload)
-$toggleDomainStatusBtn.addEventListener('click', toggleDomainStatus)
+$domainModeBtn.addEventListener('click', toggleDomainMode)
 $domainBtn.addEventListener('click', domainHandler)
 
 chrome.tabs.query({
@@ -219,7 +222,8 @@ chrome.tabs.query({
 getStorage([
   RULE_KEY,
   STATUS_KEY,
-  DOMAIN_STATUS_KEY
+  DOMAIN_LIST_KEY,
+  DOMAIN_MODE_KEY
 ]).then(result => {
   // 自定义的规则
   if (result[RULE_KEY]) {
@@ -246,6 +250,8 @@ getStorage([
   }
 
   // 黑白名单
-  domainStatusMap = result[DOMAIN_STATUS_KEY] || {}
-  toggleDomainStatus({ target: $toggleDomainStatusBtn })
+  domainListMap = result[DOMAIN_LIST_KEY] || {}
+  domainMode = result[DOMAIN_MODE_KEY] || BLACK_LIST
+  setDomainModeBtn()
+  setDomainListBtn()
 })
