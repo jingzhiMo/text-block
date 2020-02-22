@@ -1,8 +1,17 @@
 import {
   RULE_KEY,
   STATUS_KEY,
-  RUNNING_STATUS
+  RUNNING_STATUS,
+  DOMAIN_MODE_KEY,
+  DOMAIN_LIST_KEY,
+  WHITE_LIST,
+  WHITE_LIST_MODE,
+  BLACK_LIST_MODE
 } from './constant.js'
+import {
+  loadRootDomain,
+  isValidDomain
+} from './util.js'
 import { getStorage } from './storage.js'
 
 // 忽略的标签
@@ -176,24 +185,65 @@ function startObserve() {
   })
 }
 
+/**
+ * @description 当前域名是否需要进行block
+ */
+async function isBlockDomain() {
+  const result = await getStorage([DOMAIN_MODE_KEY, DOMAIN_LIST_KEY])
+  const { origin, host } = location
+  const rootDomain = loadRootDomain(host)
+  const domainList = result[DOMAIN_LIST_KEY]
+
+  if (!isValidDomain(origin)) return false
+
+  // 启用白名单模式
+  if (result[DOMAIN_MODE_KEY] === WHITE_LIST) {
+    // 当前域名在白名单内
+    if (domainList && domainList[rootDomain].indexOf(WHITE_LIST_MODE) !== -1) {
+      return true
+    }
+  } else {
+    // 当前域名不在黑名单内
+    if (
+      !domainList ||
+      !domainList[rootDomain] ||
+      domainList[rootDomain].indexOf(BLACK_LIST_MODE) === -1
+    ) {
+      return true
+    }
+  }
+
+  return false
+}
+
 // 页面启动，根据规则进行替换
-getStorage([RULE_KEY, STATUS_KEY]).then(result => {
+getStorage([
+  RULE_KEY,
+  STATUS_KEY,
+  DOMAIN_MODE_KEY,
+  DOMAIN_LIST_KEY
+]).then(async result => {
   if (!result[RULE_KEY] || !result[RULE_KEY].length || result[STATUS_KEY] !== RUNNING_STATUS) return
 
   REPLACE_PATTERN = result[RULE_KEY]
   // 首次启动为 DomContentLoaded 事件
-  replaceBody()
-  startObserve()
+  if (await isBlockDomain()) {
+    replaceBody()
+    startObserve()
+  }
 })
 
 // 监听来自popup的事件
 let lock = false
-chrome.runtime.onMessage.addListener(request => {
+chrome.runtime.onMessage.addListener(async request => {
   if (request.reload && !lock) {
     lock = true
     REPLACE_PATTERN = request.rule
-    replaceBody()
-    startObserve()
+
+    if (await isBlockDomain()) {
+      replaceBody()
+      startObserve()
+    }
     lock = false
   }
 

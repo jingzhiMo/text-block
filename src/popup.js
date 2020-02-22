@@ -1,7 +1,9 @@
 import {
   $,
   makeId,
-  generateClass
+  generateClass,
+  isValidDomain,
+  loadRootDomain
 } from './util.js'
 import {
   RULE_KEY,
@@ -11,7 +13,9 @@ import {
   RUNNING_STATUS,
   INACTIVE_STATUS,
   BLACK_LIST,
-  WHITE_LIST
+  WHITE_LIST,
+  BLACK_LIST_MODE,
+  WHITE_LIST_MODE
 } from './constant.js'
 import {
   getStorage,
@@ -154,16 +158,16 @@ async function domainHandler(ev) {
   const currentDomain = $domain.value
   const value = new Set(domainListMap[currentDomain])
   const element = ev.target
-  const isBlacklist = domainMode === BLACK_LIST ? 1 : 0
+  const mode = domainMode === BLACK_LIST ? BLACK_LIST_MODE : WHITE_LIST_MODE
 
   // 删除该域名
-  if (value.has(isBlacklist)) {
-    value.delete(isBlacklist)
+  if (value.has(mode)) {
+    value.delete(mode)
     domainListMap[currentDomain] = Array.from(value)
     setDomainListBtn(false)
   } else {
     // 增加该域名
-    domainListMap[currentDomain] = Array.from(value.add(isBlacklist))
+    domainListMap[currentDomain] = Array.from(value.add(mode))
     setDomainListBtn(true)
   }
 
@@ -190,9 +194,9 @@ function setDomainListBtn(...arg) {
   }
   const currentDomain = $domain.value
   const domainValue = new Set(domainListMap[currentDomain])
-  const isBlacklist = domainMode === BLACK_LIST ? 1 : 0
+  const mode = domainMode === BLACK_LIST ? BLACK_LIST_MODE : WHITE_LIST_MODE
 
-  updateHTML(domainValue ? domainValue.has(isBlacklist) : false)
+  updateHTML(domainValue ? domainValue.has(mode) : false)
 }
 
 /**
@@ -210,57 +214,68 @@ $reloadBtn.addEventListener('click', reload)
 $domainModeBtn.addEventListener('click', toggleDomainMode)
 $domainBtn.addEventListener('click', domainHandler)
 
-chrome.tabs.query({
-  active: true,
-  currentWindow: true
-}, result => {
-  if (!result.length) return
+async function init() {
+  // 读取之前已写入的规则、按钮状态、黑白名单
+  await getStorage([
+    RULE_KEY,
+    STATUS_KEY,
+    DOMAIN_LIST_KEY,
+    DOMAIN_MODE_KEY
+  ]).then(result => {
+    // 自定义的规则
+    if (result[RULE_KEY]) {
+      result[RULE_KEY].forEach(rule => (addRule(rule)))
+    }
 
-  const httpPattern = /^http/
-  const domainPattern = /^https?\:[\/]{2}([^\/]*)/
-  const rootDomainPattern = /([^\.]+.\w+$)/
-  const { url } = result[0]
+    // 按钮状态
+    const status = result[STATUS_KEY]
+    // 启动中
+    if (status && status === RUNNING_STATUS) {
+      $stopBtn.className = generateClass(BASE_BTN_CLASS, STOP_BTN_CLASS)
+      $stopBtn.disabled = false
+      $startBtn.className = BASE_BTN_CLASS
+      $startBtn.disabled = true
+      $reloadBtn.className = generateClass(BASE_BTN_CLASS, START_BTN_CLASS)
+      $reloadBtn.disabled = false
+    } else {
+      $startBtn.className = generateClass(BASE_BTN_CLASS, START_BTN_CLASS)
+      $stopBtn.disabled = false
+      $stopBtn.className = BASE_BTN_CLASS
+      $stopBtn.disabled = true
+      $reloadBtn.className = BASE_BTN_CLASS
+      $reloadBtn.disabled = true
+    }
 
-  if (!httpPattern.test(url)) return
+    // 黑白名单
+    domainListMap = result[DOMAIN_LIST_KEY] || {}
+    domainMode = result[DOMAIN_MODE_KEY] || BLACK_LIST
+    setDomainModeBtn()
+    setDomainListBtn()
+  })
 
-  const rootDomain = url.match(domainPattern)[1].match(rootDomainPattern)[1]
-  $domain.value = rootDomain
-})
+  chrome.tabs.query({
+    active: true,
+    currentWindow: true
+  }, result => {
+    if (!result.length) return
 
-// 读取之前已写入的规则、按钮状态、黑白名单
-getStorage([
-  RULE_KEY,
-  STATUS_KEY,
-  DOMAIN_LIST_KEY,
-  DOMAIN_MODE_KEY
-]).then(result => {
-  // 自定义的规则
-  if (result[RULE_KEY]) {
-    result[RULE_KEY].forEach(rule => (addRule(rule)))
-  }
+    const domainPattern = /^https?\:[\/]{2}([^\/]*)/
+    const { url } = result[0]
 
-  // 按钮状态
-  const status = result[STATUS_KEY]
-  // 启动中
-  if (status && status === RUNNING_STATUS) {
-    $stopBtn.className = generateClass(BASE_BTN_CLASS, STOP_BTN_CLASS)
-    $stopBtn.disabled = false
-    $startBtn.className = BASE_BTN_CLASS
-    $startBtn.disabled = true
-    $reloadBtn.className = generateClass(BASE_BTN_CLASS, START_BTN_CLASS)
-    $reloadBtn.disabled = false
-  } else {
-    $startBtn.className = generateClass(BASE_BTN_CLASS, START_BTN_CLASS)
-    $stopBtn.disabled = false
-    $stopBtn.className = BASE_BTN_CLASS
-    $stopBtn.disabled = true
-    $reloadBtn.className = BASE_BTN_CLASS
-    $reloadBtn.disabled = true
-  }
+    if (!isValidDomain(url)) {
+      [
+        $addBtn,
+        $startBtn,
+        $stopBtn,
+        $reloadBtn,
+        $domainModeBtn,
+        $domainBtn
+      ].forEach(btn => (btn.setAttribute('disabled', true)))
+      return
+    }
 
-  // 黑白名单
-  domainListMap = result[DOMAIN_LIST_KEY] || {}
-  domainMode = result[DOMAIN_MODE_KEY] || BLACK_LIST
-  setDomainModeBtn()
-  setDomainListBtn()
-})
+    $domain.value = loadRootDomain(url.match(domainPattern)[1])
+  })
+}
+
+init()

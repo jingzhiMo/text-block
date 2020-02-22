@@ -27,3 +27,21 @@ export function makeId(length) {
 export function generateClass(...cx) {
   return cx.join(' ')
 }
+
+/**
+ * @description 判断域名是否有效
+ * @param {string} domain
+ */
+export function isValidDomain(domain) {
+  const httpPattern = /^http/
+  return httpPattern.test(domain)
+}
+
+/**
+ * @description 获取当前域名的根域名
+ * @param {string} domain
+ */
+export function loadRootDomain(domain) {
+  const rootDomainPattern = /([^\.]+.\w+$)/
+  return domain.match(rootDomainPattern)[1]
+}
