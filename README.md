@@ -10,7 +10,7 @@ What scenario use `text-block`?
 1. Usually hide the word that you don't like
 2. Sometimes parent can block sensitive word for children.
 3. Play a joke with your friends.
-4. Block bullet screen(probably it is called 'danmaku') in HTML5 Video. For Example, [bilibili.com](https://www.bilibili.com), [douyu.com](https://douyu.com) etc.
+4. Block bullet screen(probably it is called 'danmaku') in HTML5 Video. For Example, [bilibili.com](https://www.bilibili.com), [douyu.com](https://www.douyu.com) etc.
 
 ## Match Rule Support
 Now`text-block`support two kinds of rule:
