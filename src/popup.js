@@ -230,10 +230,9 @@ async function init() {
         $domainModeBtn,
         $domainBtn
       ].forEach(btn => (btn.setAttribute('disabled', true)))
-      return
+    } else {
+      $domain.value = loadRootDomain(url.match(domainPattern)[1])
     }
-
-    $domain.value = loadRootDomain(url.match(domainPattern)[1])
   }
 
   // 读取之前已写入的规则、按钮状态、黑白名单
