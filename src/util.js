@@ -57,3 +57,11 @@ export function loadCurrentTab() {
     }, resolve)
   })
 }
+
+const div = document.createElement('div')
+
+div.style.backgroundColor = 'yellow'
+div.style.display = 'inline'
+div.dataset.tdt = true // tbt: text-block text
+
+export const divTemplate = div

@@ -10,7 +10,8 @@ import {
 } from './constant.js'
 import {
   loadRootDomain,
-  isValidDomain
+  isValidDomain,
+  divTemplate
 } from './util.js'
 import { getStorage } from './storage.js'
 
@@ -111,8 +112,41 @@ function replaceHandler() {
   }
 
   const { element, text } = REPLACE_QUEUE.shift()
+  const { parentElement } = element
+  const div = divTemplate.cloneNode()
+  div.innerText = text
 
-  element.textContent = text
+  if (!parentElement) {
+    requestAnimationFrame(replaceHandler)
+    return
+  }
+
+  // e.g: <element>text</element>
+  if (parentElement.childNodes.length === 1) {
+    parentElement.innerHTML = div.outerHTML
+  } else {
+    const index = [].findIndex.call(parentElement, subElement => subElement === element)
+
+    // e.g:
+    // <element>
+    //   <i></i>
+    //   <span></span>
+    //   "text"
+    // </element>
+    if (index === parentElement.childNodes.length - 1) {
+      parentElement.removeChild(element)
+      parentElement.appendChild(div)
+    } else {
+      // e.g:
+      // <element>
+      //   <i></i>
+      //   "text"
+      //   <span></span>
+      // </element>
+      parentElement.removeChild(element)
+      parentElement.inserBefore(div, parentElement.childNodes[index])
+    }
+  }
   requestAnimationFrame(replaceHandler)
 }
 
@@ -175,7 +209,15 @@ function startObserve() {
   observer = new MutationObserver(mutationRecordList => {
     mutationRecordList.forEach(record => {
       // 仅在新增节点进行处理
-      record.addedNodes.forEach(node => (enqueueMatch(matchElement(node))))
+      [].filter
+        .call(record.addedNodes, node => {
+          // comment node
+          if (!node.dataset) {
+            return false
+          }
+          return !node.dataset['tbt']
+        })
+        .forEach(node => (enqueueMatch(matchElement(node))))
     })
   })
 
