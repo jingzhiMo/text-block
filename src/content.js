@@ -140,21 +140,21 @@ function matchElement(root) {
   if (IGNORE_TAG[root.nodeName.toLowerCase()]) return element
   if ([1, 3].indexOf(root.nodeType) === -1) return element
 
-  const { childNodes, children } = root
+  const { childNodes } = root
 
   if (!childNodes || !childNodes.length) return element
 
   for (let i = 0; i < childNodes.length; i++) {
+    switch (childNodes[i].nodeType) {
+    // 元素节点
+    case 1:
+      element = element.concat(matchElement(childNodes[i]))
+      break
     // 文本节点
-    if (childNodes[i].nodeType === 3) {
+    case 3:
       element.push(childNodes[i])
+      break
     }
-  }
-
-  if (!children || !children.length) return element
-
-  for (let i = 0; i < children.length; i++) {
-    element = element.concat(matchElement(children[i]))
   }
 
   return element
