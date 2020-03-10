@@ -40,6 +40,7 @@ const $domainModeBtn = $('#tb-domain-mode-btn')[0]
 const $domainBtn = $('#tb-domain-btn')[0]
 const $domain = $('#tb-current-domain')[0]
 const $switchBtn = $('#tb-switch-btn')[0]
+const $hideOptionBtn = $('#tb-hide-btn')[0]
 
 /**
  * @description  获取当前的所有规则
@@ -230,6 +231,19 @@ function setSwitchBtn(isHighlight) {
   }
 }
 
+/**
+ * @description 切换显示更新信息的区域
+ */
+function toggleOption() {
+  const element = $('#tb-hide-option')[0]
+
+  if (element.className.includes('show')) {
+    element.className = 'tb-hide-option'
+  } else {
+    element.className = 'tb-hide-option show'
+  }
+}
+
 $addBtn.addEventListener('click', () => addRule())
 $startBtn.addEventListener('click', start)
 $stopBtn.addEventListener('click', stop)
@@ -237,6 +251,7 @@ $reloadBtn.addEventListener('click', reload)
 $domainModeBtn.addEventListener('click', toggleDomainMode)
 $domainBtn.addEventListener('click', domainHandler)
 $switchBtn.addEventListener('click', toggleHighlight)
+$hideOptionBtn.addEventListener('click', toggleOption)
 
 async function init() {
   const tabMessage = await loadCurrentTab()

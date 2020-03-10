@@ -2,6 +2,7 @@ p, body {
   margin: 0;
 }
 body {
+  position: relative;
   width: 540px;
   border-radius: 8px;
   background: #f5f7fa;
@@ -386,4 +387,47 @@ button {
 .tb-switch.selected .tb-switch__inner {
   margin-right: 24px;
   margin-left: 6px;
+}
+
+.tb-hide-option {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+  transition: .3s ease height;
+}
+.tb-hide-option.show {
+  height: 117px;
+}
+.tb-hide-option.show + .tb-hide-btn {
+  transform: rotate(180deg);
+}
+.tb-hide-btn {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  left: 50%;
+  bottom: -12px;
+  padding: 0;
+  z-index: 4;
+  margin-left: -12px;
+  border: 1px solid #e1e4eb;
+  border-radius: 50%;
+  transition: .1s linear transform;
+  transform: rotate(0);
+  cursor: pointer;
+}
+.tb-hide-btn:before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -5px;
+  margin-left: -4px;
+  box-sizing: border-box;
+  content: '';
+  width: 8px;
+  height: 8px;
+  transform: rotate(-45deg);
+  border-style: solid;
+  border-width: 0 0 2px 2px;
+  border-color: #e1e4eb;
 }
