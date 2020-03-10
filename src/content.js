@@ -4,9 +4,12 @@ import {
   RUNNING_STATUS,
   DOMAIN_MODE_KEY,
   DOMAIN_LIST_KEY,
+  HIGHLIGHT_KEY,
   WHITE_LIST,
   WHITE_LIST_MODE,
-  BLACK_LIST_MODE
+  BLACK_LIST_MODE,
+  HIGHLIGHT_COLOR,
+
 } from './constant.js'
 import {
   loadRootDomain,
@@ -44,6 +47,9 @@ let matchHandle = 0
 let replaceHandle = 0
 
 let observer = null
+
+// 高亮的颜色
+let highlightColor = ''
 
 /**
  * @description  使用requestIdleCallback处理替换动作
@@ -115,6 +121,7 @@ function replaceHandler() {
   const { parentElement } = element
   const div = divTemplate.cloneNode()
   div.innerText = text
+  div.style.backgroundColor = highlightColor
 
   if (!parentElement) {
     requestAnimationFrame(replaceHandler)
@@ -125,7 +132,7 @@ function replaceHandler() {
   if (parentElement.childNodes.length === 1) {
     parentElement.innerHTML = div.outerHTML
   } else {
-    const index = [].findIndex.call(parentElement, subElement => subElement === element)
+    const index = [].findIndex.call(parentElement.childNodes, subElement => subElement === element)
 
     // e.g:
     // <element>
@@ -144,7 +151,7 @@ function replaceHandler() {
       //   <span></span>
       // </element>
       parentElement.removeChild(element)
-      parentElement.inserBefore(div, parentElement.childNodes[index])
+      parentElement.insertBefore(div, parentElement.childNodes[index])
     }
   }
   requestAnimationFrame(replaceHandler)
@@ -258,12 +265,20 @@ async function isBlockDomain() {
   return false
 }
 
+/**
+ * @description 设置高亮颜色
+ */
+function setHighlightColor(color) {
+  highlightColor = color || ''
+}
+
 // 页面启动，根据规则进行替换
 getStorage([
   RULE_KEY,
   STATUS_KEY,
   DOMAIN_MODE_KEY,
-  DOMAIN_LIST_KEY
+  DOMAIN_LIST_KEY,
+  HIGHLIGHT_KEY
 ]).then(async result => {
   if (!result[RULE_KEY] || !result[RULE_KEY].length || result[STATUS_KEY] !== RUNNING_STATUS) return
 
@@ -273,6 +288,8 @@ getStorage([
     replaceBody()
     startObserve()
   }
+
+  setHighlightColor(result[HIGHLIGHT_KEY] ? HIGHLIGHT_COLOR : '')
 })
 
 // 监听来自popup的事件
@@ -291,5 +308,9 @@ chrome.runtime.onMessage.addListener(async request => {
 
   if (request.stop) {
     observer.disconnect()
+  }
+
+  if (request.highlight) {
+    reloadHighlight()
   }
 })

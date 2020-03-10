@@ -16,3 +16,5 @@ export const BLACK_LIST = 'blacklist'
 export const BLACK_LIST_MODE = 1
 export const WHITE_LIST = 'whitelist'
 export const WHITE_LIST_MODE = 0
+
+export const HIGHLIGHT_COLOR = 'yellow'
