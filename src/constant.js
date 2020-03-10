@@ -18,3 +18,5 @@ export const WHITE_LIST = 'whitelist'
 export const WHITE_LIST_MODE = 0
 
 export const HIGHLIGHT_COLOR = 'yellow'
+
+export const DATASET_PROP = 'tbt'

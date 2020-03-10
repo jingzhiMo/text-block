@@ -1,3 +1,4 @@
+import { DATASET_PROP } from './constant.js'
 export function $ (selector, root) {
   root = root || document
   return root.querySelectorAll(selector)
@@ -62,6 +63,6 @@ const div = document.createElement('div')
 
 div.style.backgroundColor = 'yellow'
 div.style.display = 'inline'
-div.dataset.tdt = true // tbt: text-block text
+div.dataset[DATASET_PROP] = true // tbt: text-block text
 
 export const divTemplate = div

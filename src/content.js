@@ -9,7 +9,7 @@ import {
   WHITE_LIST_MODE,
   BLACK_LIST_MODE,
   HIGHLIGHT_COLOR,
-
+  DATASET_PROP
 } from './constant.js'
 import {
   loadRootDomain,
@@ -40,11 +40,15 @@ let REPLACE_PATTERN = []
 const MATCH_QUEUE = []
 // 需要进行处理的元素的队列
 const REPLACE_QUEUE = []
+// 需要更改高亮的元素的队列
+const HIGHLIGHT_QUEUE = []
 
 // 匹配元素进行文字处理
 let matchHandle = 0
 // 对元素进行替换处理
 let replaceHandle = 0
+// 高亮元素切换处理
+let highlightHandle = 0
 
 let observer = null
 
@@ -210,6 +214,48 @@ function replaceBody() {
 }
 
 /**
+ * @description 匹配已替换的元素
+ */
+function matchHighlight(root) {
+  let element = []
+
+  // 忽略部分标签
+  if (IGNORE_TAG[root.nodeName.toLowerCase()]) return element
+  if ([1, 3].indexOf(root.nodeType) === -1) return element
+
+  let { children } = root
+
+  if (!children || !children.length) return element
+
+  for (let i = 0; i < children.length; i++) {
+    const child = children[i]
+
+    if (child.dataset[DATASET_PROP]) {
+      element.push(child)
+    } else {
+      element = element.concat(matchHighlight(child))
+    }
+  }
+
+  return element
+}
+
+/**
+ * @description 处理高亮调整
+ */
+function highlightHandler() {
+  if (!HIGHLIGHT_QUEUE.length) {
+    highlightHandle = 0
+    return
+  }
+
+  const element = HIGHLIGHT_QUEUE.shift()
+
+  element.style.backgroundColor = highlightColor
+  requestAnimationFrame(highlightHandler)
+}
+
+/**
  * @description 启动监听document发生变化
  */
 function startObserve() {
@@ -222,7 +268,8 @@ function startObserve() {
           if (!node.dataset) {
             return false
           }
-          return !node.dataset['tbt']
+          // TODO 多次更改无效？
+          return !node.dataset[DATASET_PROP]
         })
         .forEach(node => (enqueueMatch(matchElement(node))))
     })
@@ -310,7 +357,17 @@ chrome.runtime.onMessage.addListener(async request => {
     observer.disconnect()
   }
 
+  // 高亮切换
   if (request.highlight) {
-    reloadHighlight()
+    const result = await getStorage([STATUS_KEY, HIGHLIGHT_KEY])
+
+    setHighlightColor(result[HIGHLIGHT_KEY] ? HIGHLIGHT_COLOR : '')
+    if (result[STATUS_KEY] === RUNNING_STATUS) {
+      HIGHLIGHT_QUEUE.push(...matchHighlight(document.body))
+
+      if (!highlightHandle) {
+        highlightHandle = requestAnimationFrame(highlightHandler)
+      }
+    }
   }
 })

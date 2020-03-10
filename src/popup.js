@@ -218,6 +218,7 @@ async function toggleHighlight({ target }) {
   const isHighlight = !target.className.includes('selected')
   setSwitchBtn(isHighlight)
   await setStorage(HIGHLIGHT_KEY, isHighlight)
+  sendMessage({ highlight: true })
 }
 
 /**

@@ -391,13 +391,14 @@ button {
 
 .tb-hide-option {
   position: relative;
-  height: 0;
+  /* height: 0; */
   overflow: hidden;
   transition: .3s ease height;
 }
-.tb-hide-option.show {
+/* TODO #1 隐藏 option 区域按钮 */
+/* .tb-hide-option.show {
   height: 117px;
-}
+} */
 .tb-hide-option.show + .tb-hide-btn {
   transform: rotate(180deg);
 }
@@ -406,7 +407,7 @@ button {
   width: 24px;
   height: 24px;
   left: 50%;
-  bottom: -12px;
+  bottom: 0;
   padding: 0;
   z-index: 4;
   margin-left: -12px;
