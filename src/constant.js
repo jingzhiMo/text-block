@@ -6,6 +6,9 @@ export const STATUS_KEY = 'tb_status'
 export const DOMAIN_LIST_KEY = 'tb_domain_list'
 export const DOMAIN_MODE_KEY = 'tb_domain_mode'
 
+// 是否高亮标识在 chrome storage 的 key 值名称
+export const HIGHLIGHT_KEY = 'tb_highlight_mode'
+
 export const RUNNING_STATUS = 'running'
 export const INACTIVE_STATUS = 'inactive'
 

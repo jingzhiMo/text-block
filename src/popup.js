@@ -11,6 +11,7 @@ import {
   STATUS_KEY,
   DOMAIN_MODE_KEY,
   DOMAIN_LIST_KEY,
+  HIGHLIGHT_KEY,
   RUNNING_STATUS,
   INACTIVE_STATUS,
   BLACK_LIST,
@@ -38,6 +39,7 @@ const $addBtn = $('#tb-add-rule')[0]
 const $domainModeBtn = $('#tb-domain-mode-btn')[0]
 const $domainBtn = $('#tb-domain-btn')[0]
 const $domain = $('#tb-current-domain')[0]
+const $switchBtn = $('#tb-switch-btn')[0]
 
 /**
  * @description  获取当前的所有规则
@@ -207,12 +209,34 @@ function setDomainModeBtn() {
   $domainModeBtn.innerHTML = domainMode
 }
 
+/**
+ * @description 切换高亮
+ */
+async function toggleHighlight({ target }) {
+  const isHighlight = !target.className.includes('selected')
+  setSwitchBtn(isHighlight)
+  await setStorage(HIGHLIGHT_KEY, isHighlight)
+}
+
+/**
+ * @description 设置高亮按钮的样式
+ * @param {boolean} 是否高亮
+ */
+function setSwitchBtn(isHighlight) {
+  if (isHighlight) {
+    $switchBtn.className = generateClass('tb-switch', 'selected')
+  } else {
+    $switchBtn.className = generateClass('tb-switch')
+  }
+}
+
 $addBtn.addEventListener('click', () => addRule())
 $startBtn.addEventListener('click', start)
 $stopBtn.addEventListener('click', stop)
 $reloadBtn.addEventListener('click', reload)
 $domainModeBtn.addEventListener('click', toggleDomainMode)
 $domainBtn.addEventListener('click', domainHandler)
+$switchBtn.addEventListener('click', toggleHighlight)
 
 async function init() {
   const tabMessage = await loadCurrentTab()
@@ -240,7 +264,8 @@ async function init() {
     RULE_KEY,
     STATUS_KEY,
     DOMAIN_LIST_KEY,
-    DOMAIN_MODE_KEY
+    DOMAIN_MODE_KEY,
+    HIGHLIGHT_KEY
   ])
   // 自定义的规则
   if (result[RULE_KEY]) {
@@ -271,6 +296,9 @@ async function init() {
   domainMode = result[DOMAIN_MODE_KEY] || BLACK_LIST
   setDomainModeBtn()
   setDomainListBtn()
+
+  // 高亮按钮设置
+  setSwitchBtn(!!result[HIGHLIGHT_KEY])
 }
 
 init()
