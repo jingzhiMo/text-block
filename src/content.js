@@ -122,6 +122,14 @@ function replaceHandler() {
   }
 
   const { element, text } = REPLACE_QUEUE.shift()
+
+  // e.g: <element data-tbt="xx">text</element>
+  if (element.nodeType === 1 && element.dataset[DATASET_PROP]) {
+    element.textContent = text
+    requestAnimationFrame(replaceHandler)
+    return
+  }
+
   const { parentElement } = element
   const div = divTemplate.cloneNode()
   div.innerText = text
@@ -190,14 +198,20 @@ function matchElement(root) {
   if (!childNodes || !childNodes.length) return element
 
   for (let i = 0; i < childNodes.length; i++) {
-    switch (childNodes[i].nodeType) {
+    const child = childNodes[i]
+
+    switch (child.nodeType) {
     // 元素节点
     case 1:
-      element = element.concat(matchElement(childNodes[i]))
+      if (child.dataset[DATASET_PROP]) {
+        element.push(child)
+      } else {
+        element = element.concat(matchElement(child))
+      }
       break
     // 文本节点
     case 3:
-      element.push(childNodes[i])
+      element.push(child)
       break
     }
   }

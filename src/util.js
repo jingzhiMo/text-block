@@ -61,8 +61,7 @@ export function loadCurrentTab() {
 
 const div = document.createElement('div')
 
-div.style.backgroundColor = 'yellow'
 div.style.display = 'inline'
-div.dataset[DATASET_PROP] = true // tbt: text-block text
+div.dataset[DATASET_PROP] = 1 // tbt: text-block text
 
 export const divTemplate = div
