@@ -163,7 +163,6 @@ button {
   border: 1px solid transparent;
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);
   cursor: pointer;
-  -webkit-transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
   transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
   user-select: none;
   touch-action: manipulation;
@@ -368,7 +367,6 @@ button {
   display: block;
   border-radius: inherit;
   box-shadow: 0 0 0 0 #1890ff;
-  box-shadow: 0 0 0 0 var(--antd-wave-shadow-color);
   opacity: 0.2;
   animation: fadeEffect 2s cubic-bezier(0.08, 0.82, 0.17, 1), waveEffect 0.4s cubic-bezier(0.08, 0.82, 0.17, 1);
   animation-fill-mode: forwards;
@@ -381,7 +379,6 @@ button {
 .tb-switch.selected:after {
   left: 100%;
   margin-left: -1px;
-  -webkit-transform: translateX(-100%);
   transform: translateX(-100%);
 }
 .tb-switch.selected .tb-switch__inner {
