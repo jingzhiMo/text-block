@@ -73,3 +73,8 @@ foo.com
 bar.com
 ```
 `text-block` will **only work** in `foo.com` and `bar.com`
+
+### highlight
+If you want to see what html element is changed, you can toggle `highlight` button.
+
+![0.10.0_2.png](https://i.loli.net/2020/03/11/lxcEVeGPI456BzO.png)
